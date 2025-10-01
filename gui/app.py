@@ -232,4 +232,53 @@ class AIModelGUI:
             self._output_text.insert(tk.END, f"Result:\n{result}\n{'-'*40}\n")
             
         self._output_text.see(tk.END)
+
+    def _update_info_display(self):
+        """Populates the bottom information panel with model details and OOP explanations."""
+        # 1. Enable editing temporarily to insert text
+        self._info_text.config(state=tk.NORMAL)
+
+        model_name = self._model_var.get()
+        
+        temp_model = self._model_selector.get_model(model_name)
+        # Note: get_model_info() and get_usage_example() are assumed to be implemented
+        # in the model classes (SentimentModel and TextToImageModel).
+        if not temp_model:
+            model_info = {"Model Name": "N/A", "Category": "N/A", "Description": "N/A"}
+            usage_example = "N/A"
+        else:
+            model_info = temp_model.get_model_info()
+            usage_example = temp_model.get_usage_example()
+            
+        info = f"""
+* MODEL INFORMATION *
+* Model Name: {model_info.get('Model Name')}
+* Category: {model_info.get('Category')}
+* Short Description: {model_info.get('Description')}
+* Usage Example: {usage_example}
+
+* OOP CONCEPTS EXPLANATION *
+* Encapsulation: Applied by using *private-like attributes* (prefixed with _, e.g., self._is_loaded in BaseModel, self._root in GUI) to manage internal state and control access via public methods (e.g., get_model_info()).
+
+* Polymorphism & Method Overriding: The AIModelGUI interacts with all models through a common interface defined by the *BaseModel* abstract class. Each concrete model (*SentimentModel, **TextToImageModel) implements its own specific logic in methods like load_model() and predict(), formally **overriding* the abstract base methods.
+
+* Multiple Inheritance: Used in the *TextToImageModel* class, which inherits from *BaseModel* and the *TimingMixin* class, allowing it to inherit core model functionality and timing utilities.
+
+* Multiple Decorators: Applied to the *SentimentModel.predict()* method, using both *@log_action* and *@measure_time* to log function calls and execution duration simultaneously.
+"""
+        self._info_text.delete(1.0, tk.END)
+        self._info_text.insert(tk.END, info)
+
+        # 2. Disable editing to make the text read-only
+        self._info_text.config(state=tk.DISABLED)
+
+        
+    def _clear_all(self):
+        """Clears all input and output fields."""
+        self._input_text.delete(1.0, tk.END)
+        self._output_text.delete(1.0, tk.END)
+        self._output_image_label.pack_forget()
+        self._output_text.pack(fill=tk.BOTH, expand=True)
+        self._uploaded_file = None 
+        self._input_type.set("text")
         
