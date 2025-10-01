@@ -65,15 +65,66 @@ class AIModelGUI:
         menubar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Exit", command=self._root.quit)
         
-    # --- PLACEHOLDERS (To be filled by Members 2, 3, and 4) ---
-    def _create_model_selection(self): pass
-    def _create_input_section(self, parent): pass
-    def _create_output_section(self, parent): pass
-    def _create_info_section(self): pass
-    def _on_model_selected(self, event=None): pass
-    def _load_model(self): pass
-    def _run_model(self): pass
-    def _get_input_data(self): pass
-    def _display_result(self, result): pass
-    def _update_info_display(self): pass
-    def _clear_all(self): pass
+    def _create_model_selection(self):
+        """Creates the model selection dropdown and Load button."""
+        model_frame = ttk.LabelFrame(self._root, text="Model Selection", padding="10")
+        model_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(model_frame, text="Select Model:").pack(side=tk.LEFT, padx=5)
+        self._model_var = tk.StringVar()
+        self._models_list = ["Text-to-Image", "Sentiment Analysis"]
+        self._model_combo = ttk.Combobox(
+            model_frame,
+            textvariable=self._model_var,
+            values=self._models_list,
+            state="readonly",
+            width=30
+        )
+        self._model_combo.set(self._models_list[0])
+        self._model_combo.pack(side=tk.LEFT, padx=5)
+        self._model_combo.bind('<<ComboboxSelected>>', self._on_model_selected)
+        
+        ttk.Button(model_frame, text="Load Model", command=self._load_model).pack(side=tk.LEFT, padx=10)
+        
+    def _create_input_section(self, parent):
+        """Creates the User Input section (Left Column - 30%)."""
+        input_frame = ttk.LabelFrame(parent, text="Text Input Prompt", padding="10")
+        
+        # Only text input is supported in this final version
+        self._input_type = tk.StringVar(value="text") 
+        
+        # ScrolledText area for user input. Decreased height from 15 to 8.
+        self._input_text = scrolledtext.ScrolledText(input_frame, height=8, wrap=tk.WORD) 
+        self._input_text.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        # Action Buttons
+        btn_frame = ttk.Frame(input_frame)
+        btn_frame.pack(fill=tk.X, pady=5)
+        
+        # Run Button (Green)
+        ttk.Button(btn_frame, text="Run Model", command=self._run_model, 
+                   style='G.TButton').pack(side=tk.LEFT, padx=5, expand=True)
+        
+        # Clear Button (Red)
+        ttk.Button(btn_frame, text="Clear All", command=self._clear_all, 
+                   style='R.TButton').pack(side=tk.LEFT, padx=5, expand=True)
+        
+        return input_frame
+        
+    def _create_output_section(self, parent):
+        """Creates the Output section (Right Column - 70%)."""
+        output_frame = ttk.LabelFrame(parent, text="Model Output", padding="10")
+        
+        self._output_container = ttk.Frame(output_frame)
+        self._output_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Text output area
+        self._output_text = scrolledtext.ScrolledText(self._output_container, height=10, wrap=tk.WORD)
+        self._output_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Image output label (for Text-to-Image results)
+        self._output_image_label = tk.Label(self._output_container)
+        
+        return output_frame
+        
+ 
