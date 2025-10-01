@@ -8,7 +8,7 @@ def log_action(func):
     """Decorator 1: Logs function calls to a file."""
     @wraps(func)
     def wrapper(*args, **kwargs):
-        log_message = f"[LOG] Running {func._name_} at {time.ctime()}\n"
+        log_message = f"[LOG] Running {func.__name__} at {time.ctime()}\n"
         with open(LOG_FILE, "a") as f:
             f.write(log_message)
         return func(*args, **kwargs)
@@ -21,7 +21,7 @@ def measure_time(func):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        time_message = f"[TIME] {func._name_} executed in {end - start:.4f} sec\n"
+        time_message = f"[TIME] {func.__name__} executed in {end - start:.4f} sec\n"
         with open(LOG_FILE, "a") as f:
             f.write(time_message)
         return result
