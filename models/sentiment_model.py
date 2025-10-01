@@ -7,11 +7,11 @@ from utils.decorators import log_action, measure_time
 
 # Inheritance: Inherits from BaseModel
 class SentimentModel(BaseModel):
-    def _init_(self):
+    def __init__(self):
         # Call BaseModel constructor for Encapsulation
         # UPDATED: Using 'j-hartmann/emotion-english-distilroberta-base'. 
         # This is a highly stable model for 7 key emotion labels (anger, joy, sadness, etc.)
-        super()._init_(
+        super().__init__(
             model_name="j-hartmann/emotion-english-distilroberta-base",
             category="Text Classification (7 Emotion Labels)",
             description="Classifies text into 7 key emotion labels (e.g., anger, joy, sadness, fear, love, surprise, neutral)."

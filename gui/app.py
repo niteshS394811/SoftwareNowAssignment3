@@ -1,64 +1,68 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext
+from tkinter import ttk, filedialog, messagebox, scrolledtext
 from PIL import Image, ImageTk
-# Import core components (Placeholders for now)
+import os
+
+# Import core components
 from gui.model_selector import ModelSelector
 from models.base_model import BaseModel 
-# The following imports will be uncommented by other members
-# from models.text_to_image_model import TextToImageModel
-# from models.sentiment_model import SentimentModel 
 
 class AIModelGUI:
+    """
+    Main Tkinter application class handling the GUI layout, model interaction,
+    and display logic.
+    """
     def __init__(self, root):
         self._root = root
         self._setup_window()
         self._model_selector = ModelSelector()
-        # OOP Encapsulation: Use private-like attributes
-        self._current_model: BaseModel = None 
+        self._current_model: BaseModel = None
         self._uploaded_file = None
-        
         self._create_widgets()
         
     def _setup_window(self):
+        """Sets up the main window properties and custom button styles."""
         self._root.title("HIT137 Assignment 3 - AI Model GUI")
         self._root.geometry("1100x750") 
         self._root.resizable(True, True)
         
-        # Define custom styles for colored buttons (Aesthetics Requirement)
+        # Define custom styles for colored buttons
         style = ttk.Style()
         style.theme_use('clam')
-        # Green for Run
+        # Green for Run Model
         style.configure('G.TButton', background='#4CAF50', foreground='black', font=('Arial', 10, 'bold')) 
         style.map('G.TButton', background=[('active', '#66BB6A')])
-        # Red for Clear
+        # Red for Clear All
         style.configure('R.TButton', background='#F44336', foreground='white', font=('Arial', 10, 'bold'))  
         style.map('R.TButton', background=[('active', '#E57373')])
         
     def _create_widgets(self):
+        """Builds the overall application layout."""
         self._create_menu()
         self._create_model_selection()
         
-        # 1. Main container for Input (Left) and Output (Right)
+        # Main container for Input (Left) and Output (Right)
         main_content = ttk.PanedWindow(self._root, orient=tk.HORIZONTAL)
         main_content.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         
-        # 2. Left side: User Input (30% width)
+        # Left side: User Input (30% width)
         self._input_frame = self._create_input_section(main_content)
         main_content.add(self._input_frame, weight=30) 
         
-        # 3. Right side: Output (70% width)
+        # Right side: Output (70% width)
         self._output_frame = self._create_output_section(main_content)
         main_content.add(self._output_frame, weight=70) 
         
-        # FIX: Ensure 30/70 split is applied immediately (330px out of 1100px)
-        self._root.update_idletasks()
+        # FIX: Explicitly set the initial sash position to 30% of the 1100px width (330px).
+        self._root.update_idletasks() # Ensures geometry is calculated
         main_content.sashpos(0, 330)
         
-        # 4. Bottom section: Model Information
+        # Bottom section: Model Information and OOP Explanation
         self._create_info_section()
-        self._on_model_selected()
+        self._on_model_selected() # Initialize info display on startup
         
     def _create_menu(self):
+        """Creates the File menu."""
         menubar = tk.Menu(self._root)
         self._root.config(menu=menubar)
         file_menu = tk.Menu(menubar, tearoff=0)
@@ -127,4 +131,105 @@ class AIModelGUI:
         
         return output_frame
         
- 
+    def _create_info_section(self):
+        """Creates the Model Information and OOP Explanation section (Bottom Row)."""
+        info_frame = ttk.LabelFrame(self._root, text="OOP Explanation & Info Reference", padding="10")
+        info_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # The info text widget
+        self._info_text = scrolledtext.ScrolledText(info_frame, wrap=tk.WORD, height=10, font=("Arial", 9))
+        self._info_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+    def _on_model_selected(self, event=None):
+        """Updates the information panel when a new model is selected."""
+        self._update_info_display()
+            
+    def _load_model(self):
+        """
+        Loads the selected model instance using the ModelSelector factory.
+        Demonstrates Polymorphism by interacting with the BaseModel interface.
+        """
+        model_name = self._model_var.get()
+        if not model_name:
+            messagebox.showwarning("Warning", "Please select a model")
+            return
+            
+        try:
+            # Polymorphism: get_model returns an object implementing BaseModel
+            self._current_model = self._model_selector.get_model(model_name) 
+            if self._current_model is None:
+                messagebox.showerror("Error", "Model not found")
+                return
+                
+            self._output_text.insert(tk.END, f"Loading {model_name}...\n")
+            self._root.update()
+            
+            # Polymorphism: Calls the correct load_model() implementation
+            if self._current_model.load_model(): 
+                self._output_text.insert(tk.END, f"{model_name} loaded successfully!\n\n")
+            else:
+                self._output_text.insert(tk.END, f"Failed to load {model_name}. Check console for errors.\n\n")
+                self._current_model = None
+        except Exception as e:
+            messagebox.showerror("Error", f"Error loading model: {str(e)}")
+            self._current_model = None
+            
+    def _run_model(self):
+        """
+        Runs the currently loaded model with the input prompt.
+        Demonstrates Polymorphism by calling the predict method.
+        """
+        if not self._current_model:
+            messagebox.showwarning("Warning", "Please load a model first")
+            return
+            
+        input_data = self._get_input_data()
+        if input_data is None:
+            return
+            
+        try:
+            self._output_text.insert(tk.END, "Running model...\n")
+            self._root.update()
+            
+            # Polymorphism: Calls the correct predict() implementation
+            result = self._current_model.predict(input_data) 
+            self._display_result(result)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error running model: {str(e)}")
+            
+    def _get_input_data(self):
+        """Retrieves the text input from the prompt box."""
+        text = self._input_text.get(1.0, tk.END).strip()
+        if not text:
+            messagebox.showwarning("Warning", "Please enter text")
+            return None
+        return text
+            
+    def _display_result(self, result):
+        """Displays the result, handling both text and generated images."""
+        self._output_text.delete(1.0, tk.END)
+        self._output_image_label.pack_forget()
+        self._output_text.pack_forget()
+        
+        if isinstance(result, str) and result.endswith(('.png', '.jpg', '.jpeg')):
+            try:
+                img = Image.open(result)
+                img.thumbnail((450, 450)) 
+                photo = ImageTk.PhotoImage(img)
+                self._output_image_label.config(image=photo)
+                self._output_image_label.image = photo
+                
+                # Image at the top, text below for file path/confirmation
+                self._output_image_label.pack(side=tk.TOP, fill=tk.BOTH, expand=False)
+                self._output_text.pack(fill=tk.X)
+                self._output_text.insert(tk.END, f"Image generated and saved!\nFile: {result}")
+            except Exception as e:
+                self._output_text.pack(fill=tk.BOTH, expand=False)
+                self._output_text.insert(tk.END, f"Image error: Could not display image: {str(e)}")
+        else:
+            # Display text result only
+            self._output_text.pack(fill=tk.BOTH, expand=True)
+            self._output_text.insert(tk.END, f"Result:\n{result}\n{'-'*40}\n")
+            
+        self._output_text.see(tk.END)
+        
