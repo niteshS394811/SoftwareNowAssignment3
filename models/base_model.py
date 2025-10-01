@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 class BaseModel(ABC):
     """Abstract base class for all AI models"""
     
-    def _init_(self, model_name, category, description):
+    def __init__(self, model_name, category, description):
         # Encapsulation: Private-like attributes
         self._model_name = model_name
         self._category = category
