@@ -37,29 +37,28 @@ class AIModelGUI:
         style.map('R.TButton', background=[('active', '#E57373')])
         
     def _create_widgets(self):
-        """Builds the overall application layout."""
+        """Uses grid for reliable cross-platform layout"""
         self._create_menu()
         self._create_model_selection()
         
-        # Main container for Input (Left) and Output (Right)
-        main_content = ttk.PanedWindow(self._root, orient=tk.HORIZONTAL)
-        main_content.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        # Main frame with grid (FIXES WINDOWS ISSUE)
+        main_frame = ttk.Frame(self._root)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        main_frame.columnconfigure(0, weight=3)  # 30% input
+        main_frame.columnconfigure(1, weight=7)  # 70% output
+        main_frame.rowconfigure(0, weight=1)
         
-        # Left side: User Input (30% width)
-        self._input_frame = self._create_input_section(main_content)
-        main_content.add(self._input_frame, weight=30) 
+        # Input section (LEFT)
+        input_frame = self._create_input_section(main_frame)
+        input_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
         
-        # Right side: Output (70% width)
-        self._output_frame = self._create_output_section(main_content)
-        main_content.add(self._output_frame, weight=70) 
+        # Output section (RIGHT)
+        output_frame = self._create_output_section(main_frame)
+        output_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
         
-        # FIX: Explicitly set the initial sash position to 30% of the 1100px width (330px).
-        self._root.update_idletasks() # Ensures geometry is calculated
-        main_content.sashpos(0, 330)
-        
-        # Bottom section: Model Information and OOP Explanation
+        # Info section (BOTTOM)
         self._create_info_section()
-        self._on_model_selected() # Initialize info display on startup
+        self._on_model_selected()
         
     def _create_menu(self):
         """Creates the File menu."""
