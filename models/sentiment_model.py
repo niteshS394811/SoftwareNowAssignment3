@@ -9,8 +9,6 @@ from utils.decorators import log_action, measure_time
 class SentimentModel(BaseModel):
     def __init__(self):
         # Call BaseModel constructor for Encapsulation
-        # UPDATED: Using 'j-hartmann/emotion-english-distilroberta-base'. 
-        # This is a highly stable model for 7 key emotion labels (anger, joy, sadness, etc.)
         super().__init__(
             model_name="j-hartmann/emotion-english-distilroberta-base",
             category="Text Classification (7 Emotion Labels)",
@@ -21,13 +19,10 @@ class SentimentModel(BaseModel):
     # Overrides abstract method
     def load_model(self):
         try:
-            # The model ID is fetched from self._model_name
-            # This model is specifically compatible with the 'text-classification' pipeline.
             self.classifier = pipeline("text-classification", model=self._model_name)
             self._is_loaded = True
             return True
         except Exception as e:
-            # Display the actual error message that caused the failure
             print(f"Error loading model {self._model_name}: {e}") 
             return False
 
@@ -49,5 +44,4 @@ class SentimentModel(BaseModel):
 
     # Overrides abstract method
     def get_usage_example(self):
-        # Updated usage example to reflect the 7-emotion classification
         return "Enter text like 'I was totally surprised by the ending of that show!'"

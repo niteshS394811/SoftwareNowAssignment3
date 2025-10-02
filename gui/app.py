@@ -90,7 +90,7 @@ class AIModelGUI:
         ttk.Button(model_frame, text="Load Model", command=self._load_model).pack(side=tk.LEFT, padx=10)
         
     def _create_input_section(self, parent):
-        """Creates the User Input section (Left Column - 30%)."""
+        """Creates the User Input section (Left Column )."""
         input_frame = ttk.LabelFrame(parent, text="Text Input Prompt", padding="10")
         
         # Only text input is supported in this final version
@@ -115,7 +115,7 @@ class AIModelGUI:
         return input_frame
         
     def _create_output_section(self, parent):
-        """Creates the Output section (Right Column - 70%)."""
+        """Creates the Output section (Right Column)."""
         output_frame = ttk.LabelFrame(parent, text="Model Output", padding="10")
         
         self._output_container = ttk.Frame(output_frame)
@@ -146,7 +146,6 @@ class AIModelGUI:
     def _load_model(self):
         """
         Loads the selected model instance using the ModelSelector factory.
-        Demonstrates Polymorphism by interacting with the BaseModel interface.
         """
         model_name = self._model_var.get()
         if not model_name:
@@ -176,7 +175,6 @@ class AIModelGUI:
     def _run_model(self):
         """
         Runs the currently loaded model with the input prompt.
-        Demonstrates Polymorphism by calling the predict method.
         """
         if not self._current_model:
             messagebox.showwarning("Warning", "Please load a model first")
@@ -234,14 +232,11 @@ class AIModelGUI:
         
     def _update_info_display(self):
         """Populates the bottom information panel with model details and OOP explanations."""
-        # 1. Enable editing temporarily to insert text
         self._info_text.config(state=tk.NORMAL)
 
         model_name = self._model_var.get()
         
         temp_model = self._model_selector.get_model(model_name)
-        # Note: get_model_info() and get_usage_example() are assumed to be implemented
-        # in the model classes (SentimentModel and TextToImageModel).
         if not temp_model:
             model_info = {"Model Name": "N/A", "Category": "N/A", "Description": "N/A"}
             usage_example = "N/A"

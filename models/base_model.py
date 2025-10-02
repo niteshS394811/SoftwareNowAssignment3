@@ -12,16 +12,13 @@ class BaseModel(ABC):
     
     @abstractmethod
     def load_model(self):
-        """Load the model - must be implemented (Overridden) by subclasses"""
         pass
     
     @abstractmethod
     def predict(self, input_data):
-        """Make prediction - must be implemented (Overridden) by subclasses"""
         pass
     
     def get_model_info(self):
-        """Get model information, accessing encapsulated state"""
         return {
             "Model Name": self._model_name,
             "Category": self._category,
@@ -31,5 +28,4 @@ class BaseModel(ABC):
     
     @abstractmethod
     def get_usage_example(self):
-        """Get usage example - must be implemented (Overridden) by subclasses"""
         pass
